@@ -17,13 +17,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 /**
  * Thanks to Exaxxion, in the repo <a href="https://github.com/Exaxxion/NuclearCraft/tree/2.18y-ceu">Exaxxion/NuclearCraft/tree/2.18y-ceu</a>, for the original fixes!
- * This contains slightly modified code, only for circuits.
+ * This contains cleaned up and modified code, that uses new GT apis, and makes use of native GT recipe checks.
  * All the util methods are private, thus we must add them.
  */
 public class GTCEuRecipes {
@@ -31,13 +30,10 @@ public class GTCEuRecipes {
         RecipeMap<?> recipeMap = null;
         RecipeBuilder<?> builder = null;
 
-
-
         switch (recipeName) {
             case "manufactory" -> {
                 recipeMap = RecipeMaps.MACERATOR_RECIPES;
                 builder = addStats(recipeMap.recipeBuilder(), recipe, 12, 8);
-
             }
             case "isotope_separator" -> {
                 recipeMap = RecipeMaps.THERMAL_CENTRIFUGE_RECIPES;
@@ -114,34 +110,11 @@ public class GTCEuRecipes {
             case "rock_crusher" -> {
                 recipeMap = RecipeMaps.MACERATOR_RECIPES;
                 builder = addStats(recipeMap.recipeBuilder(), recipe, 20, 12);
-
             }
         }
 
         if (recipeMap == null || builder == null) {
             return;
-        }
-
-        List<List<ItemStack>> itemInputLists = new ArrayList<>();
-        List<List<FluidStack>> fluidInputLists = new ArrayList<>();
-
-        for (IItemIngredient item : recipe.itemIngredients()) itemInputLists.add(item.getInputStackList());
-        for (IFluidIngredient fluid : recipe.fluidIngredients()) fluidInputLists.add(fluid.getInputStackList());
-
-        int arrSize = recipe.itemIngredients().size() + recipe.fluidIngredients().size();
-        int[] inputNumbers = new int[arrSize];
-        Arrays.fill(inputNumbers, 0);
-
-        int[] maxNumbers  = new int[arrSize];
-        for (int i = 0; i < itemInputLists.size(); i++) {
-            int maxNumber = itemInputLists.get(i).size() - 1;
-            if (maxNumber < 0) return;
-            maxNumbers[i] = maxNumber;
-        }
-        for (int i = 0; i < fluidInputLists.size(); i++) {
-            int maxNumber = fluidInputLists.get(i).size() - 1;
-            if (maxNumber < 0) return;
-            maxNumbers[i + itemInputLists.size()] = maxNumber;
         }
 
         List<RecipeBuilder<?>> builders = new ArrayList<>(); // Holds all the recipe variants
@@ -154,8 +127,8 @@ public class GTCEuRecipes {
                 }
             }
             else {
-                List<String> ingredientOreList = new ArrayList<String>(); // Hold the different oreDict names
-                List<RecipeBuilder<?>> newBuilders = new ArrayList<RecipeBuilder<?>>();
+                List<String> ingredientOreList = new ArrayList<>(); // Hold the different oreDict names
+                List<RecipeBuilder<?>> newBuilders = new ArrayList<>();
                 for (ItemStack inputVariant : input.getInputStackList()) {
                     if(inputVariant.isEmpty()) continue;
                     Set<String> variantOreList = OreDictHelper.getOreNames(inputVariant);
@@ -201,6 +174,7 @@ public class GTCEuRecipes {
                 List<ItemStack> outputStackList = output.getOutputStackList();
                 if (outputStackList.isEmpty()) continue;
                 for (RecipeBuilder<?> builderVariant : builders) {
+                    //noinspection UnusedAssignment TODO remove this comment when GTCEu implements chanced fluid outputs
                     builderVariant = builderVariant.chancedOutput(outputStackList.get(0), (int)(((ChanceItemIngredient) output).meanStackSize * 10000.0D), 0);
                 }
             } else {
@@ -213,8 +187,9 @@ public class GTCEuRecipes {
         }
 
         for (IFluidIngredient output : recipe.fluidProducts()) {
+            //noinspection StatementWithEmptyBody TODO remove this comment when GTCEu implements chanced fluid outputs
             if (output instanceof ChanceFluidIngredient) {
-                /* TODO(Onion): EVENTUALLY WHEN CHANCED FLUID HAPPEN
+                /* TODO: Eventually when GTCEu implements chanced fluid outputs
                 List<FluidStack> outputStackList = output.getOutputStackList();
                 for (RecipeBuilder<?> builderVariant : builders) {
                     builderVariant.chancedFluidOutputs(outputStackList.get(0), (int)(((ChanceFluidIngredient) output).meanStackSize * 10000.0D), 0);
