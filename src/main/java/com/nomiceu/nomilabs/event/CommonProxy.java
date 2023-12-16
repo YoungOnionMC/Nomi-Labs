@@ -35,6 +35,7 @@ public class CommonProxy {
     public static void postInit() {
         LabsMultiblocks.postInit();
         GreenhouseTestRecipes.postInit();
+
     }
 
     @SubscribeEvent

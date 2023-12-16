@@ -22,7 +22,7 @@ import org.apache.logging.log4j.Logger;
         name = LabsValues.LABS_MODNAME,
         acceptedMinecraftVersions = "[1.12.2]",
         dependencies = "required:forge@[14.23.5.2847,);"
-                        + "required-after:gregtech;")
+                        + "required-after:gregtech;" + "required-after:chisel;")
 @SuppressWarnings("unused")
 public class NomiLabs {
     public static final Logger LOGGER = LogManager.getLogger(LabsValues.LABS_MODID);
